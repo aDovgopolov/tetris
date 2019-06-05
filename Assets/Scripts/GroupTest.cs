@@ -9,30 +9,11 @@ public class GroupTest : MonoBehaviour
 
 	void Start()
     {
-		Debug.Log("figure GroupTest");
-
-		//figure = new Figure(this.gameObject.tag)
-		//{
-		//	AllBricks = gameObject.GetComponentsInChildren<SingleBrick>()
-		//};
-		//figure.FillBricksHashMap();
-
-		//for (int i = 0; i < transform.childCount; i++)
-		//{
-		//	if (i % 2 == 1 && figure.HasSecondFloor)
-		//	{
-		//		transform.GetChild(i).GetComponent<SpriteRenderer>().color = figure.SecondSpriteColor;
-		//		continue;
-		//	}
-		//	transform.GetChild(i).GetComponent<SpriteRenderer>().color = figure.FirstSpriteColor;
-		//}
-
-		figure = FindObjectOfType<Spawner>().PrepareFigureTest(this);
-
-		//Debug.Log($"figure = {figure}");
+		figure = FindObjectOfType<Spawner>().PrepareFigure(this);
+		
 		foreach (Transform child in transform)
 		{
-			Vector2 v = Grid.roundVec2(child.position);
+			Vector2 v = Grid.RoundVec2(child.position);
 		}
 	}
 	
@@ -40,7 +21,6 @@ public class GroupTest : MonoBehaviour
 	{
 		enabled = false;
 		gameObject.GetComponent<Group>().enabled = true;
-		gameObject.GetComponent<Group>().SetFigure(figure);
 	}
 
 	public Figure GiveOwnFigure()

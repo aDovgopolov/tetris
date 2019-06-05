@@ -6,29 +6,14 @@ namespace Figures
 {
 	public class Figure
 	{
-		public SingleBrick[] AllBricks{get; set;}
 		public int upperColorNumber;
 		public int lowerColorNumber = 999;
 		public bool RotatedBy180GameObject { get; set; } = false;
-
-		public bool HasSecondFloor
-		{
-			get; private set;
-		}
-		public Color FirstSpriteColor
-		{
-			get; set;
-		}
-
-		public Color SecondSpriteColor
-		{
-			get; set;
-		}
-
-		public int BrickCost
-		{
-			get; private set;
-		} = 10;
+		public int BrickCost { get; private set; } = 10;
+		public bool HasSecondFloor{ get; private set;}
+		public SingleBrick[] AllBricks{ get; set; }
+		public Color FirstSpriteColor{ get; set; }
+		public Color SecondSpriteColor{ get; set; }
 
 		public Figure(string tag)
 		{
@@ -68,7 +53,6 @@ namespace Figures
 						lowerColorNumber = 0;
 					else
 						upperColorNumber = 0;
-					//Debug.Log("red");
 					break;
 				case 1:
 					ColorUtility.TryParseHtmlString("#964E4E", out color);

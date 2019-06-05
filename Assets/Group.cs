@@ -1,54 +1,33 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Figures;
+using Figures; 
 
 public class Group : MonoBehaviour
 {
 	private float lastFall = 1;
+	private float clicked = 0;
+	private float clicktime = 0;
+	private readonly float clickdelay = 0.3f;
+	private SplashManager SplashManager;
 	private Figure figure;
 	delegate void Splashing();
 	Splashing splashing;
 
 	void Start()
     {
-		Debug.Log("figure");
 		if (!IsValidGridPos())
 		{
 			Destroy(gameObject);
 		}
 
-		if(GetComponent<GroupTest>() != null)
-		{
-			GetComponent<GroupTest>().GiveOwnFigure();
-		}
+		SplashManager = SplashManager.Instance;
+		if (GetComponent<GroupTest>() != null)
+			figure =  GetComponent<GroupTest>().GiveOwnFigure();
 		else
-		{
 			figure = FindObjectOfType<Spawner>().PrepareFigure(this);
-		}
-		//Debug.Log($"figure = {figure.HasSecondFloor}");
-		//figure = new Figure(this.gameObject.tag)
-		//{
-		//	AllBricks = gameObject.GetComponentsInChildren<SingleBrick>()
-		//};
 
-		//figure.FillBricksHashMap();
-
-		//for (int i = 0; i < transform.childCount; i++)
-		//{
-		//	if (i % 2 == 1 && figure.HasSecondFloor)
-		//	{
-		//		transform.GetChild(i).GetComponent<SpriteRenderer>().color = figure.SecondSpriteColor;
-		//		continue;
-		//	}
-		//	transform.GetChild(i).GetComponent<SpriteRenderer>().color = figure.FirstSpriteColor;
-		//}
-	}
-
-	public void SetFigure(Figure _figure)
-	{
-		Debug.Log("SetFigure");
-		this.figure = _figure;
+		StartCoroutine(DestroyItselfWhenEmpty());
 	}
 
 	void Update()
@@ -68,9 +47,38 @@ public class Group : MonoBehaviour
 			MoveRight();
 		}
 
-		else if (Input.GetKeyDown(KeyCode.DownArrow) || Time.time - lastFall >= 1)
+		else if (Input.GetKeyDown(KeyCode.DownArrow))
 		{
+			clicked++;
+			if (clicked == 1) clicktime = Time.time;
+
+			if (clicked > 1 && Time.time - clicktime < clickdelay)
+			{
+				clicked = 0;
+				clicktime = 0;
+				MoveToFloor(15);
+			}
+			else if (clicked > 2 || Time.time - clicktime > 1) clicked = 0;
+		}
+
+		else if (Input.GetKeyDown(KeyCode.DownArrow) || Time.time - lastFall >= 1)
+		{	
 			MoveDownAndFall();
+		}
+	}
+
+	public void MoveToFloor(int floorLevel)
+	{
+		transform.position += new Vector3(0, -floorLevel, 0);
+
+		if (!IsValidGridPos())
+		{
+			transform.position += new Vector3(0, floorLevel, 0);
+			MoveToFloor(floorLevel - 1);
+		}
+		else
+		{
+			UpdateGrid();
 		}
 	}
 
@@ -82,7 +90,6 @@ public class Group : MonoBehaviour
 			UpdateGrid();
 		else
 			transform.position += new Vector3(1, 0, 0);
-		
 	}
 
 	public void MoveRight()
@@ -107,10 +114,9 @@ public class Group : MonoBehaviour
 		{
 			transform.position += new Vector3(0, 1, 0);
 			
+			FillGrid();
 			CheckCollisions();
-			
 			FindObjectOfType<Spawner>().SpawnNext();
-			//FindObjectOfType<Spawner>().SpawnNextV1();
 
 			enabled = false;
 		}
@@ -120,7 +126,6 @@ public class Group : MonoBehaviour
 
 	public void ChangeRotation()
 	{
-		//Debug.Log(figure.RotatedBy180GameObject);
 		if (!figure.HasSecondFloor) return;
 
 		if (!figure.RotatedBy180GameObject)
@@ -143,11 +148,81 @@ public class Group : MonoBehaviour
 		}
 	}
 
-	public virtual void CheckCollisions()
+	public void RemoveGroupScriptsFromObject()
+	{
+		enabled = false;
+		gameObject.AddComponent<GroupTest>();
+	}
+
+	IEnumerator DestroyItselfWhenEmpty()
+	{
+		while (true)
+		{
+			if (gameObject.transform.childCount != 0)
+			{
+				yield return new WaitForSeconds(10f);
+			}
+			else
+			{
+				Destroy(gameObject);
+				yield break;
+			}
+		}
+	}
+
+	private bool IsValidGridPos()
 	{
 		foreach (Transform child in transform)
 		{
-			Vector2 v = Grid.roundVec2(child.position);
+			Vector2 v = Grid.RoundVec2(child.position);
+
+			if (!Grid.InsideBorder(v))
+				return false;
+
+			if (Grid.grid[(int)v.x, (int)v.y] != null &&
+				Grid.grid[(int)v.x, (int)v.y].parent != transform)
+				return false;
+		}
+		return true;
+	}
+
+	private void UpdateGrid()
+	{
+		for (int y = 0; y < Grid.h; ++y)
+			for (int x = 0; x < Grid.w; ++x)
+				if (Grid.grid[x, y] != null)
+					if (Grid.grid[x, y].parent == transform)
+						Grid.grid[x, y] = null;
+
+		foreach (Transform child in transform)
+		{
+			Vector2 v = Grid.RoundVec2(child.position);
+			Grid.grid[(int)v.x, (int)v.y] = child;
+		}
+	}
+
+	private void FillGrid()
+	{
+		foreach (Transform child in transform)
+		{
+			Vector2 v = Grid.RoundVec2(child.position);
+			if ((int)v.y == 0) return;
+
+			while (v.y - 1 >= 0 && Grid.grid[(int)v.x, (int)v.y - 1] == null)
+			{
+				Grid.grid[(int)v.x, (int)v.y - 1] = child;
+				Grid.grid[(int)v.x, (int)v.y - 1].position += new Vector3(0, -1, 0);
+				Grid.grid[(int)v.x, (int)v.y] = null;
+				v.y = v.y - 1;
+			}
+		}
+	}
+
+	public void CheckCollisions()
+	{
+		foreach (Transform child in transform)
+		{
+			Vector2 v = Grid.RoundVec2(child.position);
 
 			if (v.y == 0) continue;
 
@@ -168,27 +243,14 @@ public class Group : MonoBehaviour
 		{
 			if (child.GetSiblingIndex() % 2 == (figure.RotatedBy180GameObject ? 1 : 0))
 			{
-				CheckColorDownElementV2(child.GetSiblingIndex(), v);
+				CheckColorDownElement(child.GetSiblingIndex(), v);
 			}
 		}
 		else
-			CheckColorDownElementV2(child.GetSiblingIndex(), v);
+			CheckColorDownElement(child.GetSiblingIndex(), v);
 	}
 
-	public void CheckColorDownElement(int ChildIndex, Vector2 v)
-	{
-		Group ob = Grid.grid[(int)v.x, (int)v.y - 1].gameObject.GetComponentInParent<Group>();
-		int underColorNumber = ob.figure.HasSecondFloor ? 
-			ob.figure.upperColorNumber : ob.figure.lowerColorNumber;
-
-		if (figure.lowerColorNumber == underColorNumber)
-		{
-			Grid.DeleteElements((int)v.x, (int)v.y);
-			splashing = SplashingPair;
-		}
-	}
-	//свернуть с куском кода из делегата
-	public void CheckColorDownElementV2(int ChildIndex, Vector2 v)
+	private void CheckColorDownElement(int ChildIndex, Vector2 v)
 	{
 		SingleBrick ob2 = Grid.grid[(int)v.x, (int)v.y - 1].gameObject.GetComponent<SingleBrick>();
 
@@ -196,71 +258,25 @@ public class Group : MonoBehaviour
 		{
 			Grid.DeleteElements((int)v.x, (int)v.y);
 			UIManager.Instance.UpdatePlayerCount(figure.BrickCost * 2);
-			splashing = SplashingPair;
+			if (splashing == null)
+				splashing = SplashingPair;
 		}
 	}
 
-	bool IsValidGridPos()
-	{
-		foreach (Transform child in transform)
-		{
-			Vector2 v = Grid.roundVec2(child.position);
-
-			// Not inside Border?
-			if (!Grid.InsideBorder(v))
-				return false;
-
-			// Block in grid cell (and not part of same group)?
-			if (Grid.grid[(int)v.x, (int)v.y] != null &&
-				Grid.grid[(int)v.x, (int)v.y].parent != transform)
-				return false;
-		}
-		return true;
-	}
-
-	void UpdateGrid()
-	{
-		// Remove old children from grid
-		for (int y = 0; y < Grid.h; ++y)
-			for (int x = 0; x < Grid.w; ++x)
-				if (Grid.grid[x, y] != null)
-					if (Grid.grid[x, y].parent == transform)
-						Grid.grid[x, y] = null;
-
-		// Add new children to grid
-		foreach (Transform child in transform)
-		{
-			Vector2 v = Grid.roundVec2(child.position);
-			Grid.grid[(int)v.x, (int)v.y] = child;
-		}
-	}
-	
-	//Delegate
 	private void SplashingPair()
 	{
 		foreach (Transform child in transform)
 		{
-			Vector2 v = Grid.roundVec2(child.position);
+			Vector2 v = Grid.RoundVec2(child.position);
 
-			if (v.y == 0) continue;
+			if ((int)v.y == 0) return;
 
 			bool isSomethingDown = Grid.grid[(int)v.x, (int)v.y - 1] != null;
 			if (isSomethingDown && Grid.grid[(int)v.x, (int)v.y - 1].parent != transform)
 			{
-				SingleBrick ob2 = Grid.grid[(int)v.x, (int)v.y - 1].gameObject.GetComponent<SingleBrick>();
-
-				if (figure.AllBricks[child.GetSiblingIndex()].MyColor == ob2.MyColor)
-				{
-					Grid.DeleteElements((int)v.x, (int)v.y);
-					UIManager.Instance.UpdatePlayerCount(figure.BrickCost * 2);
-				} 
+				CheckColorDownElement(child.GetSiblingIndex(), v);
 			}
 		}
 	}
 
-	public void RemoveGroupScriptsFromObject()
-	{
-		enabled = false;
-		gameObject.AddComponent<GroupTest>();
-	}
 }

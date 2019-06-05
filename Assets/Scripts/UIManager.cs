@@ -35,21 +35,7 @@ public class UIManager : MonoBehaviour
 		playerCount.text = "" + totalCount;
 	}
 
-	public void SetNextFigureImage(GameObject gm)
-	{
-		Debug.Log($"SetNextFigureImage = {gm} + name = {GameObject.FindGameObjectWithTag("NextFigure").name}");
-		//GameObject newChild = gm;
-		//newChild.transform.parent = GameObject.FindGameObjectWithTag("NextFigure").transform;
-		//newChild.transform.localPosition = Vector3.zero;
-		
-		Instantiate(gm,
-					GameObject.FindGameObjectWithTag("NextFigure").transform);
-
-		Debug.Log($"SetNextFigureImage = {transform.position}");
-		//nextFigureImage.sprite = _sprite;
-	}
-
-	public void setNewParent(GameObject newChild)
+	public void SetNewParent(GameObject newChild)
 	{
 		newChild.GetComponent<Group>().RemoveGroupScriptsFromObject();
 		newChild.transform.SetParent(GameObject.FindGameObjectWithTag("NextFigure").transform);
