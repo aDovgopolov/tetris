@@ -1,53 +1,66 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Figures;
+using System;
 
-public class SplashManager : MonoBehaviour
+public class SplashManager
 {
 	private static SplashManager _instance;
+	private Group group;
+	delegate void Splashing();
+	Splashing splashing;
 
-	public static SplashManager Instance
+
+	
+	delegate void IsEqual2(Transform x, Vector2 y);
+
+	public SplashManager(Group _group)
 	{
-		get
-		{
-			if (_instance == null)
-			{
+		this.group = _group;
 
-				Debug.LogError("Error");
-			}
-			return _instance;
-		}
+		Sum2((x, y) => { PlaceOfConnection2(x,y); });
 	}
 
-	private void Awake()
+	private static int Sum2(IsEqual2 func)
 	{
-		_instance = this;
+		int result = 0;
+		func(null, new Vector2(0, 0));
+		Debug.Log("private static int Sum2(IsEqual2 func)");
+		return result;
 	}
+
+	public void PlaceOfConnection2(Transform child, Vector2 v)
+	{
+		Debug.Log("PlaceOfConnection2");
+	}
+
+
 
 	public void CheckCollisions()
 	{
-		foreach (Transform child in transform)
+		foreach (Transform child in group.gameObject.transform)
 		{
 			Vector2 v = Grid.RoundVec2(child.position);
 
 			if (v.y == 0) continue;
 
 			bool isSomethingDown = Grid.grid[(int)v.x, (int)v.y - 1] != null;
-			if (isSomethingDown && Grid.grid[(int)v.x, (int)v.y - 1].parent != transform)
+			if (isSomethingDown && Grid.grid[(int)v.x, (int)v.y - 1].parent != group.gameObject.transform)
 			{
 				PlaceOfConnection(child, v);
 			}
 		}
 
-		if (figure.HasSecondFloor && splashing != null)
+		if (group.Figure.HasSecondFloor && splashing != null)
 			splashing();
 	}
 
 	public void PlaceOfConnection(Transform child, Vector2 v)
 	{
-		if (figure.HasSecondFloor)
+		if (group.Figure.HasSecondFloor)
 		{
-			if (child.GetSiblingIndex() % 2 == (figure.RotatedBy180GameObject ? 1 : 0))
+			if (child.GetSiblingIndex() % 2 == (group.Figure.RotatedBy180GameObject ? 1 : 0))
 			{
 				CheckColorDownElement(child.GetSiblingIndex(), v);
 			}
@@ -56,32 +69,33 @@ public class SplashManager : MonoBehaviour
 			CheckColorDownElement(child.GetSiblingIndex(), v);
 	}
 
-	private void CheckColorDownElement(int ChildIndex, Vector2 v)
+	public void CheckColorDownElement(int ChildIndex, Vector2 v)
 	{
 		SingleBrick ob2 = Grid.grid[(int)v.x, (int)v.y - 1].gameObject.GetComponent<SingleBrick>();
 
-		if (figure.AllBricks[ChildIndex].MyColor == ob2.MyColor)
+		if (group.Figure.AllBricks[ChildIndex].MyColor == ob2.MyColor)
 		{
 			Grid.DeleteElements((int)v.x, (int)v.y);
-			UIManager.Instance.UpdatePlayerCount(figure.BrickCost * 2);
+			UIManager.Instance.UpdatePlayerCount(group.Figure.BrickCost * 2);
 			if (splashing == null)
 				splashing = SplashingPair;
 		}
 	}
 
-	private void SplashingPair()
+	public void SplashingPair()
 	{
-		foreach (Transform child in transform)
+		foreach (Transform child in group.gameObject.transform)
 		{
 			Vector2 v = Grid.RoundVec2(child.position);
 
 			if ((int)v.y == 0) return;
 
 			bool isSomethingDown = Grid.grid[(int)v.x, (int)v.y - 1] != null;
-			if (isSomethingDown && Grid.grid[(int)v.x, (int)v.y - 1].parent != transform)
+			if (isSomethingDown && Grid.grid[(int)v.x, (int)v.y - 1].parent != group.gameObject.transform)
 			{
 				CheckColorDownElement(child.GetSiblingIndex(), v);
 			}
 		}
+		Grid.FillEmptyGrid(group);
 	}
 }

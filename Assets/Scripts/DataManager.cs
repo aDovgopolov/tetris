@@ -23,9 +23,11 @@ public class DataManager : MonoBehaviour
 
 		FileStream file = File.Open(Application.persistentDataPath + "/playerInfo.data", FileMode.Open);
 
-		PlayerData data = new PlayerData();
-		data.health = 1;
-		data.gems = 1;
+		PlayerData data = new PlayerData
+		{
+			health = 1,
+			gems = 1
+		};
 
 		bf.Serialize(file, data);
 		file.Close();

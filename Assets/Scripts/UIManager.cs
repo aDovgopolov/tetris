@@ -39,6 +39,6 @@ public class UIManager : MonoBehaviour
 	{
 		newChild.GetComponent<Group>().RemoveGroupScriptsFromObject();
 		newChild.transform.SetParent(GameObject.FindGameObjectWithTag("NextFigure").transform);
-		newChild.transform.localPosition = new Vector3(-469f, -213f, 0);
+		newChild.transform.localPosition = new Vector3(-461.5f, -208.5f, 0);
 	}
 }
