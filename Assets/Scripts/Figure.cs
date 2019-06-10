@@ -7,7 +7,9 @@ namespace Figures
 	public class Figure
 	{
 		public int upperColorNumber;
-		public int lowerColorNumber = 999;
+		public int lowerColorNumber;
+		private bool universalUpper = false;
+		private bool universalLower = false;
 		public bool RotatedBy180GameObject { get; set; } = false;
 		public int BrickCost { get; private set; } = 10;
 		public bool HasSecondFloor{ get; private set;}
@@ -33,10 +35,12 @@ namespace Figures
 			{
 				if (i % 2 == 1 && HasSecondFloor)
 				{
-					AllBricks[i].MyColor = upperColorNumber; 
+					AllBricks[i].MyColor = upperColorNumber;
+					AllBricks[i].Universal = universalUpper;
 					continue;
 				}
 				AllBricks[i].MyColor = lowerColorNumber;
+				AllBricks[i].Universal = universalLower;
 			}
 		}
 
@@ -76,7 +80,17 @@ namespace Figures
 						upperColorNumber = 3;
 					break;
 				case 4:
-					color = Color.gray; lowerColorNumber = 4;
+					ColorUtility.TryParseHtmlString("#1A4FD4", out color);
+					if (floor == 1)
+					{
+						lowerColorNumber = 4;
+						universalLower = true;
+					}
+					else
+					{
+						upperColorNumber = 4;
+						universalUpper = true;
+					}
 					break;
 				default:
 					color = Color.cyan; lowerColorNumber = 5;

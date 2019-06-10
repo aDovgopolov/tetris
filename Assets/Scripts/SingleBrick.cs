@@ -8,4 +8,6 @@ public class SingleBrick : MonoBehaviour
 	{
 		get; set;
 	} = 0;
+
+	public bool Universal { get; set; } = false;
 }

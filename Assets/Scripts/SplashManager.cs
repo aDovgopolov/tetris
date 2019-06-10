@@ -11,29 +11,30 @@ public class SplashManager
 	delegate void Splashing();
 	Splashing splashing;
 
-
-	
-	delegate void IsEqual2(Transform x, Vector2 y);
-
 	public SplashManager(Group _group)
 	{
 		this.group = _group;
 
-		Sum2((x, y) => { PlaceOfConnection2(x,y); });
+		//Sum2((x, y) => { PlaceOfConnection2(x, y); });
 	}
 
-	private static int Sum2(IsEqual2 func)
-	{
-		int result = 0;
-		func(null, new Vector2(0, 0));
-		Debug.Log("private static int Sum2(IsEqual2 func)");
-		return result;
-	}
+	//delegate void IsEqual2(Transform x, Vector2 y);
 
-	public void PlaceOfConnection2(Transform child, Vector2 v)
-	{
-		Debug.Log("PlaceOfConnection2");
-	}
+	
+
+	//private static int Sum2(IsEqual2 func)
+	//{
+	//	int result = 0;
+	//	func(null, new Vector2(0, 0));
+	//	Debug.Log("private static int Sum2(IsEqual2 func)");
+	//	return result;
+	//}
+
+	//public void PlaceOfConnection2(Transform child, Vector2 v)
+	//{
+	//	Debug.Log("PlaceOfConnection2");
+	//}
+
 
 
 
@@ -54,6 +55,8 @@ public class SplashManager
 
 		if (group.Figure.HasSecondFloor && splashing != null)
 			splashing();
+
+		Grid.FillEmptyGrid(group);
 	}
 
 	public void PlaceOfConnection(Transform child, Vector2 v)
@@ -73,7 +76,7 @@ public class SplashManager
 	{
 		SingleBrick ob2 = Grid.grid[(int)v.x, (int)v.y - 1].gameObject.GetComponent<SingleBrick>();
 
-		if (group.Figure.AllBricks[ChildIndex].MyColor == ob2.MyColor)
+		if (group.Figure.AllBricks[ChildIndex].Universal || group.Figure.AllBricks[ChildIndex].MyColor == ob2.MyColor)
 		{
 			Grid.DeleteElements((int)v.x, (int)v.y);
 			UIManager.Instance.UpdatePlayerCount(group.Figure.BrickCost * 2);
@@ -88,7 +91,7 @@ public class SplashManager
 		{
 			Vector2 v = Grid.RoundVec2(child.position);
 
-			if ((int)v.y == 0) return;
+			if ((int)v.y == 0) continue;
 
 			bool isSomethingDown = Grid.grid[(int)v.x, (int)v.y - 1] != null;
 			if (isSomethingDown && Grid.grid[(int)v.x, (int)v.y - 1].parent != group.gameObject.transform)
@@ -96,6 +99,6 @@ public class SplashManager
 				CheckColorDownElement(child.GetSiblingIndex(), v);
 			}
 		}
-		Grid.FillEmptyGrid(group);
+		//Grid.FillEmptyGrid(group);
 	}
 }

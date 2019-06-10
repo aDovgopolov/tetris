@@ -7,8 +7,9 @@ public class UIManager : MonoBehaviour
 {
 	private static UIManager _instance;
 	private int totalCount = 0;
-	
+	private int topPlayerCount;
 	public Text playerCount;
+	public Text topPlayerCountText;
 	public Image nextFigureImage;
 
 	public static UIManager Instance
@@ -33,6 +34,22 @@ public class UIManager : MonoBehaviour
 	{
 		totalCount += count;
 		playerCount.text = "" + totalCount;
+	}
+
+	public int GetTotalCount()
+	{
+		return totalCount;
+	}
+
+	public int GetTopCount()
+	{
+		return topPlayerCount;
+	}
+
+	public void SetTopPlayerCount(int count)
+	{
+		topPlayerCount = count;
+		topPlayerCountText.text = "" + count;
 	}
 
 	public void SetNewParent(GameObject newChild)

@@ -11,6 +11,8 @@ public class Spawner: MonoBehaviour
 	
 	void Start()
     {
+		//DataManager.Instance.PreloadDataFile();
+		DataManager.Instance.Load();
 		ShowNextElement();
 
 		Instantiate(groups[Random.Range(0, groups.Length)],
@@ -18,8 +20,19 @@ public class Spawner: MonoBehaviour
 					Quaternion.identity);
 	}
 
+	private bool CheckGameOver()
+	{
+		Debug.Log("CheckGameOver");
+		if (UIManager.Instance.GetTopCount() < UIManager.Instance.GetTotalCount())
+		{
+			DataManager.Instance.Save(UIManager.Instance.GetTotalCount());
+		}
+		return false;
+	}
+
 	public void SpawnNext()
 	{
+		CheckGameOver();
 		nextGameObject.transform.position = transform.position;
 
 		if(nextGameObject.GetComponent<GroupTest>() != null)
@@ -30,13 +43,11 @@ public class Spawner: MonoBehaviour
 		ShowNextElement();
 	}
 
-
 	public void ShowNextElement()
 	{
 		nextGameObject = Instantiate(groups[Random.Range(0, groups.Length)]);
 		UIManager.Instance.SetNewParent(nextGameObject);
 	}
-
 
 	public Figure PrepareFigure<T>(T group) where T : Component
 	{

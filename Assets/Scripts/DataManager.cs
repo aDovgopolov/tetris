@@ -10,23 +10,56 @@ public class DataManager : MonoBehaviour
 	[Serializable]
 	public class PlayerData
 	{
-		public int health;
-		public int gems;
+		public int points;
 	}
 
-	private int health;
-	private int gems;
+	private int points = 0;
 
-	public void Save()
+	private static DataManager _instance;
+
+	public static DataManager Instance
+	{
+		get
+		{
+			if (_instance == null)
+			{
+
+				Debug.LogError("Error");
+			}
+			return _instance;
+		}
+	}
+
+	private void Awake()
+	{
+		_instance = this;
+	}
+
+	public void PreloadDataFile()
+	{
+		string nFile = @"C:/Users/Alex/AppData/LocalLow/xlow/Tetris/playerInfo.data";
+
+		if (File.Exists(nFile))
+		{
+			Debug.Log("File already exists!");
+		}
+		else
+		{
+			Debug.Log("File NOT exists!");
+			FileStream fs = new FileStream(nFile, FileMode.CreateNew, FileAccess.ReadWrite);
+			fs.Close();
+			Save(0); // default data
+		}
+	}
+
+	public void Save(int playerCount)
 	{
 		BinaryFormatter bf = new BinaryFormatter();
-
 		FileStream file = File.Open(Application.persistentDataPath + "/playerInfo.data", FileMode.Open);
 
 		PlayerData data = new PlayerData
 		{
-			health = 1,
-			gems = 1
+			points = playerCount
 		};
 
 		bf.Serialize(file, data);
@@ -35,17 +68,18 @@ public class DataManager : MonoBehaviour
 
 	public void Load()
 	{
-		if(File.Exists(Application.persistentDataPath + "/playerInfo.data"))
+		PreloadDataFile();
+
+		if (File.Exists(Application.persistentDataPath + "/playerInfo.data"))
 		{
 			BinaryFormatter bf = new BinaryFormatter();
-			FileStream file = File.Open(Application.persistentDataPath + "/playerInfo.data", FileMode.Open);
+			FileStream file = File.Open(Application.persistentDataPath + "/playerInfo.data", FileMode.OpenOrCreate);
 
 			PlayerData data = (PlayerData)bf.Deserialize(file);
 			file.Close();
 
-
-			health = data.health;
-			gems = data.gems;
+			points = data.points;
 		}
+		UIManager.Instance.SetTopPlayerCount(points);
 	}
 }
