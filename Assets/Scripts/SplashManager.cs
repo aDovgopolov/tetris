@@ -76,7 +76,7 @@ public class SplashManager
 	{
 		SingleBrick ob2 = Grid.grid[(int)v.x, (int)v.y - 1].gameObject.GetComponent<SingleBrick>();
 
-		if (group.Figure.AllBricks[ChildIndex].Universal || group.Figure.AllBricks[ChildIndex].MyColor == ob2.MyColor)
+		if (group.Figure.AllBricks[ChildIndex].Universal || group.Figure.AllBricks[ChildIndex].MyColor == ob2.MyColor || ob2.Universal)
 		{
 			Grid.DeleteElements((int)v.x, (int)v.y);
 			UIManager.Instance.UpdatePlayerCount(group.Figure.BrickCost * 2);

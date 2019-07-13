@@ -16,7 +16,6 @@ public class Grid :MonoBehaviour
 
 	public static bool InsideBorder(Vector2 pos)
 	{
-		//Debug.Log("InsideBorder");
 		return ((int)pos.x >= 0 &&
 				(int)pos.x < w &&
 				(int)pos.y >= 0);
@@ -40,8 +39,6 @@ public class Grid :MonoBehaviour
 
 	public static void UpdateGrid(Group group)
 	{
-
-		//Debug.Log("UpdateGrid");
 		for (int y = 0; y < Grid.h; ++y)
 			for (int x = 0; x < Grid.w; ++x)
 				if (Grid.grid[x, y] != null)
@@ -75,7 +72,6 @@ public class Grid :MonoBehaviour
 
 	public static bool IsValidGridPos(Group group)
 	{
-		//Debug.Log("IsValidGridPos");
 		foreach (Transform child in group.gameObject.transform)
 		{
 			Vector2 v = Grid.RoundVec2(child.position);

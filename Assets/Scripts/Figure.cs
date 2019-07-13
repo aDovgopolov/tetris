@@ -47,7 +47,7 @@ namespace Figures
 		public Color GetColor(int floor)
 		{
 			Color color;
-			int j = Random.Range(0, 4);
+			int j = Random.Range(0, 5);
 
 			switch (j)
 			{

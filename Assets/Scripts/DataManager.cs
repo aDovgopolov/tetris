@@ -45,7 +45,7 @@ public class DataManager : MonoBehaviour
 		}
 		else
 		{
-			Debug.Log("File NOT exists!");
+			Debug.Log("File not exists!");
 			FileStream fs = new FileStream(nFile, FileMode.CreateNew, FileAccess.ReadWrite);
 			fs.Close();
 			Save(0); // default data
